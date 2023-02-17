@@ -1,52 +1,68 @@
-use glium::{implement_vertex, VertexBuffer};
+use glium::implement_vertex;
 
 #[derive(Clone, Copy)]
 pub struct Vertex {
-    pub position: [f32; 2],
+    position: [f32; 2],
+    tex_coords: [f32; 2],
 }
 
-pub fn init(display: &glium::Display) -> VertexBuffer<Vertex> {
-    let vertex1 = Vertex {
-        position: [-0.5, -0.5],
-    };
-    let vertex2 = Vertex {
-        position: [0.0, 0.5],
-    };
-    let vertex3 = Vertex {
-        position: [0.5, -0.25],
-    };
-    implement_vertex!(Vertex, position);
-
-    let shape = vec![vertex1, vertex2, vertex3];
-
-    VertexBuffer::new(display, &shape).unwrap()
+pub fn program(display: &glium::Display) -> glium::Program {
+    glium::Program::from_source(display, vertex_shader(), fragment_shader(), None).unwrap()
 }
 
-pub fn vertex_shader<'a>() -> &'a str {
+fn vertex_shader<'a>() -> &'a str {
     r#"
     #version 140
 
     in vec2 position;
-
-    void main(){
-        gl_Position = vec4(position, 0.0, 1.0);
+    in vec2 tex_coords;
+    out vec2 v_tex_coords;
+    
+    uniform mat4 matrix;
+    
+    void main() {
+        v_tex_coords = tex_coords;
+        gl_Position = matrix * vec4(position, 0.0, 1.0);
     }
     "#
 }
 
-pub fn fragment_shader<'a>() -> &'a str {
+fn fragment_shader<'a>() -> &'a str {
     r#"
     #version 140
 
+    in vec2 v_tex_coords;
     out vec4 color;
-
-    void main(){
-        color = vec4(1.0, 0.0, 0.0, 1.0);
+    
+    uniform sampler2D tex;
+    
+    void main() {
+        color = texture(tex, v_tex_coords);
     }
-
     "#
 }
 
-pub fn get_indices () -> glium::index::NoIndices{
+pub fn get_indices() -> glium::index::NoIndices {
     glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList)
+}
+
+pub fn init(display: &glium::Display) -> glium::VertexBuffer<Vertex> {
+    implement_vertex!(Vertex, position, tex_coords);
+
+    let vertex1 = Vertex {
+        position: [-0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+    };
+    let vertex2 = Vertex {
+        position: [0.0, 0.5],
+        tex_coords: [0.0, 1.0]
+    };
+    let vertex3 = Vertex {
+        position: [0.5, -0.25],
+        tex_coords: [1.0, 0.0]
+    };
+
+    let shape = vec![vertex1, vertex2, vertex3];
+
+    glium::VertexBuffer::new(display, &shape).unwrap()
 }

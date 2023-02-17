@@ -1,15 +1,16 @@
 #[macro_use]
 mod drawing_loop;
-mod vertex_rs;
 mod Drawing_window;
+mod vertex_rs;
 extern crate glium;
+extern crate image;
+use drawing_loop::drawing_loop;
 use glium::glutin;
-use drawing_loop::DrawlingLoop::drawing_loop;
 fn main() {
-    let mut event_loop = glutin::event_loop::EventLoop::new();
+    let event_loop = glutin::event_loop::EventLoop::new();
     let wb = glutin::window::WindowBuilder::new();
     let cb = glutin::ContextBuilder::new();
-    let display = glium::Display::new(wb, cb, &event_loop);
+    let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
     drawing_loop(event_loop, display);
 }

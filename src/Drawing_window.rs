@@ -1,24 +1,38 @@
-use crate::vertex_rs;
-use glium::Surface;
+use crate::vertex_rs::{get_indices, init, program};
+use glium::{uniform, Surface};
+use glium;
+pub fn draw(display: &glium::Display, mut t: f32, texture: &glium::texture::SrgbTexture2d) -> f32 {
 
-pub fn draw(display: &mut glium::Display) {
-    let vertex_shader = vertex_rs::vertex_shader();
-    let fragment_shader = vertex_rs::fragment_shader();
-    let vertex_buffer = vertex_rs::init(display);
-    let indices = vertex_rs::get_indices();
-    let program =
-        glium::Program::from_source(display, vertex_shader, fragment_shader, None).unwrap();
+    let vertex_buffer = init(&display);
+    let indices = get_indices();
+    let program = program(display);
+
+    t += 0.0032;
 
     let mut target = display.draw();
     target.clear_color(0.0, 0.0, 1.0, 1.0);
+
+    let uniforms = uniform! {
+        matrix: [
+            [t.cos(), t.sin(), t.cos(), 0.0],
+            [t.sin(), t.cos(), t.sin(), 0.0],
+            [0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0f32],
+        ],
+        tex: texture,
+    };
+
     target
         .draw(
             &vertex_buffer,
-            indices,
+            &indices,
             &program,
-            &glium::uniforms::EmptyUniforms,
+            &uniforms,
             &Default::default(),
         )
         .unwrap();
+
     target.finish().unwrap();
+
+    t
 }
