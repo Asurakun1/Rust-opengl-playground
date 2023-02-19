@@ -1,20 +1,21 @@
 #[macro_use]
 extern crate glium;
-mod wall;
-mod drawing_loop;
-mod Drawing_window;
-mod texutre_load;
-mod vertex_rs;
-use drawing_loop::drawing_loop;
+
+mod window_display;
+mod draw;
+mod shaders;
+mod shape;
+
+use glium::glutin;
+use window_display::window_display;
 
 fn main() {
-    #[allow(unused_imports)]
-    use glium::{glutin, Surface};
-
     let event_loop = glutin::event_loop::EventLoop::new();
-    let wb = glutin::window::WindowBuilder::new();
-    let cb = glutin::ContextBuilder::new().with_depth_buffer(24);
+    let wb = glutin::window::WindowBuilder::new()
+        .with_title("Hello window repitition")
+        .with_inner_size(glutin::dpi::LogicalSize::new(800.0, 600.0));
+    let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
-    drawing_loop(event_loop, display);
 
+    window_display(event_loop, display);
 }
